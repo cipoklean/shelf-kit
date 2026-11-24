@@ -1,4 +1,4 @@
-import { Column, defineElement, Heading, MergeTag, prop, Row, Table, TableCell, TableRow, Text, token } from "@hyper-elements/react";
+import { Column, defineElement, Heading, MergeTag, prop, Row, Span, Table, TableCell, TableRow, Text, token } from "@hyper-elements/react";
 import { GENRES } from "./types";
 import { GENRE_LABEL, shelves, spineHeight } from "./shelf";
 
@@ -149,5 +149,47 @@ export const ShelfHeader = defineElement({
         </Text>
       ) : null}
     </Column>
+  ),
+});
+
+/**
+ * The poster's key to the numbered spines: number, a genre swatch, title and author, pages. An amber
+ * swatch beside the number marks a five-star book, matching the band on its spine.
+ */
+export const TitleKey = defineElement({
+  type: "shelf.TitleKey",
+  label: "Title key",
+  description: "The numbered list that goes with a numbered Bookshelf: number, genre swatch, title, author and pages, five stars marked in amber.",
+  props: {
+    books: prop.list(
+      prop.object(
+        {
+          n: prop.number({ label: "Number", required: true, integer: true, min: 1 }),
+          title: prop.text({ label: "Title", required: true, maxLength: 120 }),
+          author: prop.text({ label: "Author", required: true, maxLength: 80 }),
+          pages: prop.number({ label: "Pages", required: true, integer: true, min: 1 }),
+          genre: prop.choice(GENRES, { label: "Genre", required: true }),
+          fiveStar: prop.boolean({ label: "Five stars", default: false }),
+        },
+        { label: "Book" },
+      ),
+      { label: "Books", required: true, min: 1 },
+    ),
+  },
+  render: ({ books }) => (
+    <Table style={{ width: "100%", rowBorder: { width: 0.5, style: "solid", color: token("colors.surface") } }}>
+      {books.map((b) => (
+        <TableRow key={b.n}>
+          <TableCell style={{ width: 28, padding: [7, 0], fontWeight: 600, verticalAlign: "top" }}>{String(b.n)}</TableCell>
+          <TableCell style={{ width: 4, padding: 0, backgroundColor: b.fiveStar ? token("colors.bookmark") : undefined, fontSize: 1, lineHeight: 1 }}>{"\u00a0"}</TableCell>
+          <TableCell style={{ width: 4, padding: 0, backgroundColor: genreColor(b.genre), fontSize: 1, lineHeight: 1 }}>{"\u00a0"}</TableCell>
+          <TableCell style={{ padding: [7, 8, 7, 12], verticalAlign: "top" }}>
+            {b.title}
+            <Span style={{ color: token("colors.muted") }}>{` · ${b.author}`}</Span>
+          </TableCell>
+          <TableCell style={{ apply: ["muted"], width: 44, padding: [7, 0], textAlign: "right", verticalAlign: "top" }}>{String(b.pages)}</TableCell>
+        </TableRow>
+      ))}
+    </Table>
   ),
 });

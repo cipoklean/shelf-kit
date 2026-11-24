@@ -57,6 +57,12 @@ export const shelfTheme = defineTheme({
     stat: { fontFamily: "{fonts.heading}", fontSize: "{fontSizes.stat}", fontWeight: 600, lineHeight: 1 },
   },
   formats: {
+    // The tabloid poster: read from a step back on a wall or a desk.
+    document: {
+      fontSizes: { body: 16, label: 13, caption: 13, stat: 52 },
+      lineHeights: { body: 1.35 },
+      elements: { Heading: { by: { level: { 1: { fontSize: 76, lineHeight: 1 } } } } },
+    },
     email: {
       fontSizes: { body: 16, label: 12, caption: 13, stat: 32 },
       lineHeights: { body: 1.5 },
