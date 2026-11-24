@@ -1,0 +1,41 @@
+YOUR YEAR IN BOOKS · 2026
+
+YOUR SHELF GREW BY 20 BOOKS
+
+{{first_name}}, here's your year as a bookshelf: one spine per book, as tall as the book was long, in the order you read them.
+
+ | Fiction 5 |  | Sci-fi 4 |  | Nonfiction 3
+ | Mystery 3 |  | Fantasy 3 |  | Memoir 2
+ | Five stars |  |  |  | 
+
+20
+
+books finished
+
+7,716
+
+pages turned
+
+658
+
+pages in your longest, Dune
+
+FIVE STARS · 7 BOOKS
+
+Things Fall Apart · Chinua Achebe
+
+Project Hail Mary · Andy Weir
+
+Piranesi · Susanna Clarke
+
+Born a Crime · Trevor Noah
+
+Half of a Yellow Sun · Chimamanda Ngozi Adichie
+
+Educated · Tara Westover
+
+Tomorrow, and Tomorrow, and Tomorrow · Gabrielle Zevin
+
+Share your shelf (https://shelf.example/2026/ada)
+
+Made from your Goodreads export. Spine height is page count; colour is genre, from your shelves.
