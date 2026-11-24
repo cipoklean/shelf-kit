@@ -28,17 +28,22 @@ export function parseCsv(text: string): string[][] {
 }
 
 /** Goodreads shelf names (and StoryGraph-style genre words) to the spine colours. First match wins. */
+// Shelf names are split on commas and checked one at a time, so "mythology, nonfiction" is judged by
+// each name rather than by the whole string. Spaces, hyphens and underscores count as the same.
 const SHELF_TO_GENRE: [RegExp, Genre][] = [
-  [/sci-?fi|science-?fiction|space|dystopi/i, "scifi"],
-  [/fantasy|myth|magic/i, "fantasy"],
-  [/mystery|thriller|crime|suspense|horror/i, "mystery"],
-  [/memoir|biograph|autobiograph/i, "memoir"],
-  [/non-?fiction|history|science|business|self-?help|programming|psycholog|essays/i, "nonfiction"],
-  [/fiction|novel|literary|classics|romance/i, "fiction"],
+  [/\btrue[ -]?crime\b/, "nonfiction"],
+  [/\bmemoirs?\b|biograph|autobiograph/, "memoir"],
+  [/\bnon[ -]?fiction\b|\bhistory\b|\bpopular[ -]science\b|\bscience\b(?![ -]?fiction)|business|self[ -]?help|programming|psycholog|philosoph|politic|economic|\bnature\b|\btravel\b|technolog|\bhealth\b|\bdesign\b|\bart\b|journalism|essays?\b|\bwriting\b/, "nonfiction"],
+  [/\bsci[ -]?fi\b|science[ -]?fiction|space[ -]?opera|dystopi|cyberpunk|\bsf\b/, "scifi"],
+  [/fantasy|mytholog|\bmyths?\b|magic|fairy[ -]?tale/, "fantasy"],
+  [/myster|thriller|\bcrime\b|suspense|horror|detective|noir/, "mystery"],
+  [/\bfiction\b|novels?\b|literary|classics?\b|romance|young[ -]?adult|\bya\b|contemporary|poetry|manga|graphic[ -]?novel|short[ -]?stor/, "fiction"],
 ];
 
 export function genreFrom(shelves: string): Genre {
-  for (const [re, g] of SHELF_TO_GENRE) if (re.test(shelves)) return g;
+  const names = shelves.split(",").map((s) => s.trim().toLowerCase().replaceAll("_", "-")).filter(Boolean);
+  // A specific genre beats a broad one: rules are in priority order, and each is tried against every name.
+  for (const [re, g] of SHELF_TO_GENRE) if (names.some((n) => re.test(n))) return g;
   return "other";
 }
 
@@ -49,6 +54,7 @@ export function genreFrom(shelves: string): Genre {
  */
 export function readGoodreads(text: string, year: number): { books: Book[]; skippedNoPages: string[] } {
   const [header, ...rows] = parseCsv(text);
+  if (!header) throw new Error("The CSV file is empty.");
   const col = (name: string) => {
     const i = header.indexOf(name);
     if (i < 0) throw new Error(`This doesn't look like a Goodreads export: there's no "${name}" column.`);
@@ -61,17 +67,18 @@ export function readGoodreads(text: string, year: number): { books: Book[]; skip
   const books: Book[] = [];
   const skippedNoPages: string[] = [];
   for (const r of rows) {
-    if (r[c.exclusive] !== "read") continue;
-    const date = r[c.dateRead].replaceAll("/", "-");
+    const field = (i: number) => (r[i] ?? "").trim();
+    if (field(c.exclusive) !== "read") continue;
+    const date = field(c.dateRead).replaceAll("/", "-");
     if (!date.startsWith(`${year}-`)) continue;
-    const pages = Number(r[c.pages]);
-    if (!pages) { skippedNoPages.push(r[c.title]); continue; }
+    const pages = Number(field(c.pages));
+    if (!Number.isInteger(pages) || pages < 1) { skippedNoPages.push(field(c.title) || "(untitled)"); continue; }
     books.push({
-      title: r[c.title].trim(),
-      author: r[c.author].trim(),
+      title: field(c.title) || "(untitled)",
+      author: field(c.author) || "Unknown author",
       pages,
-      rating: Number(r[c.rating]) || 0,
-      genre: genreFrom(r[c.shelves]),
+      rating: Number(field(c.rating)) || 0,
+      genre: genreFrom(field(c.shelves)),
       dateRead: date,
     });
   }

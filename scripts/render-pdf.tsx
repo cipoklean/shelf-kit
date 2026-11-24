@@ -3,10 +3,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { ElementsError, formatDiagnostics, outline, render, validate } from "@hyper-elements/react";
 import { renderPdf } from "@hyper-elements/react/pdf";
 import { ShelfPoster } from "../src/pdf";
-import { loadYear } from "../src/data";
+import { loadYearOrExit } from "../src/data";
 import { loadFonts } from "./fonts";
 
-const design = <ShelfPoster year={await loadYear()} />;
+const design = <ShelfPoster year={await loadYearOrExit()} />;
 await mkdir("out", { recursive: true });
 const report = validate(design);
 if (report.diagnostics.length) console.log(formatDiagnostics(report.diagnostics));

@@ -4,6 +4,9 @@ import { GENRE_LABEL, shelves, spineHeight } from "./shelf";
 
 const genreColor = (g: (typeof GENRES)[number]) => token(`colors.${g}`);
 
+// A paper-coloured border above and below a swatch cell keeps swatches in neighbouring rows from touching.
+const gapLine = { width: 3, style: "solid", color: token("colors.background") } as const;
+
 /**
  * The year as a bookshelf: one spine per book, in the order they were read, as tall as the book was
  * long and coloured by genre, with an amber band at the top of every five-star book. Each shelf is a
@@ -48,7 +51,6 @@ export const Bookshelf = defineElement({
             alignItems: "end",
             justifyContent: "start",
             gap,
-            height: maxHeight,
             border: { bottom: { width: plank, style: "solid", color: token("colors.plank") } },
             mobile: phoneGap === undefined ? undefined : { gap: phoneGap },
           }}
@@ -66,7 +68,7 @@ export const Bookshelf = defineElement({
                 mobile: phoneSpine === undefined ? undefined : { width: phoneSpine },
               }}
             >
-              <Text style={{ fontFamily: token("fonts.label"), fontWeight: 600, fontSize: numbers ? numberSize : 1, lineHeight: 1, textAlign: "center", color: numbers ? token("colors.primaryForeground") : genreColor(b.genre) }}>
+              <Text style={{ apply: ["label"], fontSize: numbers ? numberSize : 1, lineHeight: 1, textAlign: "center", color: numbers ? token("colors.primaryForeground") : genreColor(b.genre) }}>
                 {numbers ? String(b.n) : "\u00a0"}
               </Text>
             </Column>
@@ -89,12 +91,15 @@ export const ShelfKey = defineElement({
     genres: prop.list(prop.object({ genre: prop.choice(GENRES, { label: "Genre", required: true }), count: prop.number({ label: "Books", required: true, integer: true }) }, { label: "Genre" }), { label: "Genres", required: true }),
     columns: prop.number({ label: "Columns", default: 3, min: 1, max: 4, integer: true }),
     swatch: prop.number({ label: "Swatch width", default: 6, min: 2, integer: true }),
+    fiveStars: prop.boolean({ label: "Show the five-star band", default: true }),
   },
-  render: ({ genres, columns, swatch }) => {
-    const keys = [...genres.map((g) => ({ color: genreColor(g.genre), label: `${GENRE_LABEL[g.genre]} ${g.count}` })), { color: token("colors.bookmark"), label: "Five stars" }];
+  render: ({ genres, columns, swatch, fiveStars }) => {
+    const keys = [
+      ...genres.map((g) => ({ color: genreColor(g.genre), label: `${GENRE_LABEL[g.genre]} ${g.count}` })),
+      ...(fiveStars ? [{ color: token("colors.bookmark"), label: "Five stars" }] : []),
+    ];
     const rows = shelves(keys, columns);
     // A paper-coloured border above and below each swatch keeps the little spines from touching row to row.
-    const gapLine = { width: 3, style: "solid", color: token("colors.background") } as const;
     return (
       <Table style={{ width: "100%", borderCollapse: "separate" }}>
         {rows.map((row, r) => (
@@ -117,7 +122,7 @@ export const Stat = defineElement({
   description: "A big slab number over a small label.",
   props: {
     value: prop.text({ label: "Value", required: true, maxLength: 12 }),
-    label: prop.text({ label: "Label", required: true, maxLength: 40 }),
+    label: prop.text({ label: "Label", required: true, maxLength: 100 }),
   },
   render: ({ value, label }) => (
     <Column style={{ gap: 4 }}>
@@ -134,14 +139,15 @@ export const ShelfHeader = defineElement({
   description: "A small kicker, the slab title, and an optional line that opens with the reader's name from a merge tag.",
   props: {
     kicker: prop.text({ label: "Kicker", required: true, maxLength: 60 }),
-    title: prop.text({ label: "Title", required: true, maxLength: 60 }),
+    title: prop.text({ label: "Title", required: true, maxLength: 80 }),
     line: prop.text({ label: "Line", maxLength: 160 }),
     nameMergeTag: prop.text({ label: "Name merge tag", maxLength: 40, pattern: "^[A-Za-z_][A-Za-z0-9_]*$" }),
+    fitTitle: prop.boolean({ label: "Shrink the title to one line", default: false }),
   },
-  render: ({ kicker, title, line, nameMergeTag }) => (
+  render: ({ kicker, title, line, nameMergeTag, fitTitle }) => (
     <Column style={{ gap: 10 }}>
-      <Heading level={2} style={{ color: token("colors.muted") }}>{kicker}</Heading>
-      <Heading level={1}>{title}</Heading>
+      <Heading level={2}>{kicker}</Heading>
+      <Heading level={1} fit={fitTitle ? { sizes: [96, 88, 80, 72, 64, 56], maxLines: 1 } : undefined}>{title}</Heading>
       {line || nameMergeTag ? (
         <Text style={{ apply: ["muted"] }}>
           {nameMergeTag ? <><MergeTag name={nameMergeTag} />, </> : null}
@@ -165,8 +171,8 @@ export const TitleKey = defineElement({
       prop.object(
         {
           n: prop.number({ label: "Number", required: true, integer: true, min: 1 }),
-          title: prop.text({ label: "Title", required: true, maxLength: 120 }),
-          author: prop.text({ label: "Author", required: true, maxLength: 80 }),
+          title: prop.text({ label: "Title", required: true, maxLength: 300 }),
+          author: prop.text({ label: "Author", required: true, maxLength: 200 }),
           pages: prop.number({ label: "Pages", required: true, integer: true, min: 1 }),
           genre: prop.choice(GENRES, { label: "Genre", required: true }),
           fiveStar: prop.boolean({ label: "Five stars", default: false }),
@@ -177,15 +183,15 @@ export const TitleKey = defineElement({
     ),
   },
   render: ({ books }) => (
-    <Table style={{ width: "100%", rowBorder: { width: 0.5, style: "solid", color: token("colors.surface") } }}>
+    <Table style={{ width: "100%", rowBorder: { width: 1, style: "solid", color: token("colors.hairline") } }}>
       {books.map((b) => (
         <TableRow key={b.n}>
           <TableCell style={{ width: 28, padding: [7, 0], fontWeight: 600, verticalAlign: "top" }}>{String(b.n)}</TableCell>
-          <TableCell style={{ width: 4, padding: 0, backgroundColor: b.fiveStar ? token("colors.bookmark") : undefined, fontSize: 1, lineHeight: 1 }}>{"\u00a0"}</TableCell>
-          <TableCell style={{ width: 4, padding: 0, backgroundColor: genreColor(b.genre), fontSize: 1, lineHeight: 1 }}>{"\u00a0"}</TableCell>
+          <TableCell style={{ width: 4, padding: 0, backgroundColor: b.fiveStar ? token("colors.bookmark") : undefined, border: { top: gapLine, bottom: gapLine }, fontSize: 1, lineHeight: 1 }}>{"\u00a0"}</TableCell>
+          <TableCell style={{ width: 4, padding: 0, backgroundColor: genreColor(b.genre), border: { top: gapLine, bottom: gapLine }, fontSize: 1, lineHeight: 1 }}>{"\u00a0"}</TableCell>
           <TableCell style={{ padding: [7, 8, 7, 12], verticalAlign: "top" }}>
             {b.title}
-            <Span style={{ color: token("colors.muted") }}>{` · ${b.author}`}</Span>
+            <Span style={{ apply: ["muted"] }}>{` · ${b.author}`}</Span>
           </TableCell>
           <TableCell style={{ apply: ["muted"], width: 44, padding: [7, 0], textAlign: "right", verticalAlign: "top" }}>{String(b.pages)}</TableCell>
         </TableRow>

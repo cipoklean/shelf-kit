@@ -4,13 +4,13 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { ElementsError, formatDiagnostics, render } from "@hyper-elements/react";
 import { emailClients, renderInEmailClients } from "@hyper-elements/email-clients";
 import { ShelfEmail } from "../src/email";
-import { loadYear } from "../src/data";
+import { loadYearOrExit } from "../src/data";
 
 // What the sending service fills in, for the previews only. The HTML in out/ keeps {{first_name}}.
 const sample: Record<string, string> = { first_name: "Ada" };
 
-const design = <ShelfEmail year={await loadYear()} />;
-await mkdir("out/email/previews", { recursive: true });
+const design = <ShelfEmail year={await loadYearOrExit()} />;
+await mkdir("out/email", { recursive: true });
 try {
   const { html, text, diagnostics } = await render(design, { plugins: [await emailClients()] });
   if (diagnostics.length) console.log(formatDiagnostics(diagnostics));
@@ -25,6 +25,7 @@ try {
       fonts: "inline",
       mergeTag: (name) => sample[name] ?? `{{${name}}}`,
     });
+    await mkdir("out/email/previews", { recursive: true });
     for (const p of previews) await writeFile(`out/email/previews/${p.filename}`, p.html);
     console.log("previews:", previews.map((p) => p.filename).join(", "));
     if (skipped.length) console.log("skipped:", JSON.stringify(skipped));

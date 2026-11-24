@@ -4,10 +4,10 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { ElementsError, formatDiagnostics } from "@hyper-elements/react";
 import { layoutImage, renderImage } from "@hyper-elements/react/image";
 import { ShelfCard } from "../src/card";
-import { loadYear } from "../src/data";
+import { loadYearOrExit } from "../src/data";
 import { loadFonts } from "./fonts";
 
-const design = <ShelfCard year={await loadYear()} />;
+const design = <ShelfCard year={await loadYearOrExit()} />;
 await mkdir("out", { recursive: true });
 try {
   const fonts = await loadFonts();

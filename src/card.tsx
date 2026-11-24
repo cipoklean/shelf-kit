@@ -1,5 +1,5 @@
-import { Canvas, Column, Heading, Row, Text } from "@hyper-elements/react";
-import { Bookshelf, ShelfKey, Stat } from "./elements";
+import { Canvas, Column, Row } from "@hyper-elements/react";
+import { Bookshelf, ShelfHeader, ShelfKey, Stat } from "./elements";
 import { fmt, stats } from "./shelf";
 import { shelfTheme } from "./theme";
 import type { ReadingYear } from "./types";
@@ -16,16 +16,13 @@ export function ShelfCard({ year, theme = shelfTheme }: { year: ReadingYear; the
   const maxHeight = Math.min(560, Math.floor((640 - (shelfCount - 1) * 60) / shelfCount));
   return (
     <Canvas theme={theme} lang="en" width={1080} height={1350} title={`${year.reader}'s ${year.year} shelf`} style={{ padding: 72, gap: 40, justifyContent: "space-between" }}>
-      <Column style={{ gap: 18 }}>
-        <Heading level={2}>{`${year.reader}'s year in books`}</Heading>
-        <Heading level={1} fit={{ sizes: [96, 88, 80, 72], maxLines: 1 }}>{`My ${year.year} shelf`}</Heading>
-      </Column>
+      <ShelfHeader kicker="A year in books" title={`${year.reader}'s ${year.year} shelf`} fitTitle />
       <Column style={{ gap: 24 }}>
         <Bookshelf books={year.books.map((b) => ({ pages: b.pages, genre: b.genre, fiveStar: b.rating === 5 }))} spine={spine} gap={gap} minHeight={Math.round(maxHeight * 0.32)} maxHeight={maxHeight} perShelf={perShelf} plank={12} band={16} />
-        <ShelfKey genres={s.genres.map(([genre, count]) => ({ genre, count }))} columns={4} swatch={10} />
+        <ShelfKey genres={s.genres.map(([genre, count]) => ({ genre, count }))} columns={4} swatch={10} fiveStars={s.fiveStars.length > 0} />
       </Column>
       <Row style={{ gap: 32 }}>
-        <Stat value={String(s.count)} label="books" />
+        <Stat value={String(s.count)} label={s.count === 1 ? "book" : "books"} />
         <Stat value={fmt(s.pages)} label="pages" />
         <Stat value={String(s.fiveStars.length)} label="five stars" />
       </Row>

@@ -21,12 +21,24 @@ export function shelves<T>(items: T[], perShelf: number): T[][] {
 export function stats(books: Book[]) {
   const pages = books.reduce((n, b) => n + b.pages, 0);
   const longest = books.reduce((a, b) => (b.pages > a.pages ? b : a), books[0]);
-  const rated = books.filter((b) => b.rating);
-  const avg = rated.length ? rated.reduce((n, b) => n + b.rating, 0) / rated.length : 0;
   const counts = new Map<Genre, number>();
   for (const b of books) counts.set(b.genre, (counts.get(b.genre) ?? 0) + 1);
   const genres = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-  return { count: books.length, pages, longest, avgRating: avg, genres, fiveStars: books.filter((b) => b.rating === 5) };
+  return { count: books.length, pages, longest, genres, fiveStars: books.filter((b) => b.rating === 5) };
 }
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
+
+/** "1 book", "20 books". */
+export const plural = (n: number, word: string) => `${fmt(n)} ${word}${n === 1 ? "" : "s"}`;
+
+/** Shortens text to `max` characters at a word break, with an ellipsis. */
+export function clip(text: string, max: number): string {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,:;(#-]+$/, "")}\u2026`;
+}
+
+/** A Goodreads title without its series note: "The Way of Kings (The Stormlight Archive, #1)" is "The Way of Kings". */
+export const shortTitle = (title: string) => title.replace(/\s*\([^)]*#\s*[\d.]+\)\s*$/, "");

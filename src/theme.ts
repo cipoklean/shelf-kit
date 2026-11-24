@@ -1,9 +1,10 @@
 import { defineTheme } from "@hyper-elements/react";
 
-// "Navy on white" (taste-skill palette white-navy-tab, dealt for a shop): a white ground so the
+// "Navy on white": a white ground so the
 // genre colours on the spines read true, navy ink for type and the shelf plank, and one amber accent,
 // the bookmark band on a five-star spine. Zilla Slab, a slab with a library's warmth, sets headings;
-// Rethink Sans sets everything else. Contrast on white: ink 13.9:1, muted 6.0:1. Amber is never text.
+// Rethink Sans sets everything else. Contrast on white: ink 13.9:1, muted 5.9:1. Amber is never text.
+// Every genre colour holds white spine numbers at 4.5:1 or better (other, the lightest, 4.8:1).
 export const shelfTheme = defineTheme({
   colors: {
     background: "#ffffff",
@@ -14,15 +15,16 @@ export const shelfTheme = defineTheme({
     surface: "#f4f4f2",
     muted: "#5b6478",
     rule: "#1f2b4d",
+    hairline: "#e2e4e8",
     plank: "#1f2b4d",
     bookmark: "#f7941d",
     fiction: "#2f5d8a",
     scifi: "#3f7f7a",
     fantasy: "#6a4c7d",
     mystery: "#9b3d3d",
-    nonfiction: "#6f7d4f",
-    memoir: "#b07a4a",
-    other: "#8a919c",
+    nonfiction: "#667448",
+    memoir: "#966235",
+    other: "#6b727e",
   },
   fonts: {
     body: "'Rethink Sans', Helvetica, Arial, sans-serif",
@@ -38,7 +40,7 @@ export const shelfTheme = defineTheme({
       by: {
         level: {
           1: { fontSize: 34, lineHeight: 1.05 },
-          2: { fontFamily: "{fonts.label}", fontSize: "{fontSizes.label}", fontWeight: 600, lineHeight: 1.2, textTransform: "uppercase", letterSpacing: 1 },
+          2: { fontFamily: "{fonts.label}", fontSize: "{fontSizes.label}", color: "{colors.muted}", lineHeight: 1.2, textTransform: "uppercase", letterSpacing: 1 },
         },
       },
     },
